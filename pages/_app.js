@@ -12,6 +12,7 @@ function MyApp({ Component, pageProps }) {
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet"
         />
+        <title>Google Docs Clone</title>
       </Head>
       <Provider session={pageProps.session}>
         <Component {...pageProps} />

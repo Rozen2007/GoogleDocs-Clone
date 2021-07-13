@@ -13,5 +13,8 @@ export default NextAuth({
     }),
     // ...add more providers here
   ],
+  pages: {
+    signIn: "/login",
+  },
   adapter: FirebaseAdapter(db),
 });
