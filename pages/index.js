@@ -3,28 +3,27 @@ import Icon from "@material-tailwind/react/Icon";
 import Head from "next/head";
 import Image from "next/image";
 import Header from "../components/Header";
-import Login from "../components/Login";
 import Modal from "@material-tailwind/react/Modal";
 import ModalBody from "@material-tailwind/react/ModalBody";
 import ModalFooter from "@material-tailwind/react/ModalFooter";
 import firebase from "firebase";
 import DocumentRow from "../components/DocumentRow";
 
-import { getSession, useSession } from "next-auth/client";
-import { useState } from "react";
+import { getSession } from "next-auth/client";
+import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
+import { useRouter } from "next/dist/client/router";
 
-export default function Home() {
-  const [session] = useSession(); // Fonctionne grâce au <Provider> dans "_app.js"
-  if (!session) return <Login />;
+export default function Home({ session }) {
+  const router = useRouter();
 
   const [showModal, setShowModal] = useState(false);
   const [input, setInput] = useState("");
   const [snapshot] = useCollection(
     db
       .collection("userDocs")
-      .doc(session.user.email)
+      .doc(session?.user?.email)
       .collection("docs")
       .orderBy("timestamp", "desc")
   );
@@ -32,7 +31,7 @@ export default function Home() {
   function createDocument() {
     if (!input || input.toString().trim() === "") return;
 
-    db.collection("userDocs").doc(session.user.email).collection("docs").add({
+    db.collection("userDocs").doc(session?.user?.email).collection("docs").add({
       fileName: input,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
@@ -43,7 +42,7 @@ export default function Home() {
 
   function deleteDocument(id) {
     db.collection("userDocs")
-      .doc(session.user.email)
+      .doc(session?.user?.email)
       .collection("docs")
       .doc(id)
       .delete();
@@ -146,6 +145,12 @@ export default function Home() {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
+
+  if (!session) {
+    return {
+      redirect: { destination: "/login" },
+    };
+  }
 
   return {
     props: {
